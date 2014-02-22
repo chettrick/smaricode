@@ -1,0 +1,116 @@
+#!/usr/local/bin/expect -f
+
+if {$argc != 1} {
+	exp_send_error "usage: flashloader file\n"
+	exit 1
+}
+
+spawn -noecho cu -l /dev/cuaU0 -s 57600
+log_user 0
+
+set file_name [lindex $argv 0]
+catch {set fptr [open $file_name r]}
+set contents [read -nonewline $fptr]
+close $fptr
+set hex_record [split $contents "\n"]
+
+set lst_addrdata {}
+set lst_bytewrite {
+	"5555" "AA"
+	"2AAA" "55"
+	"5555" "A0"
+}
+set lst_chiperase {
+	"5555" "AA"
+	"2AAA" "55"
+	"5555" "80"
+	"5555" "AA"
+	"2AAA" "55"
+	"5555" "10"
+}
+
+# Parse Intel hex file.
+foreach line $hex_record {
+	set start_code	[string index $line 0]
+	set byte_count	[format %u 0x[string range $line 1 2]]
+	set start_addr	[format %u 0x[string range $line 3 6]]
+	set record_type	[format %02u 0x[string range $line 7 8]]
+	set raw_data	[string range $line 9 end-2]
+	set checksum	[format %u 0x[string range $line end-1 end]]
+
+	set lst_data {}
+	foreach byte [regexp -all -inline -- .. $raw_data] {
+		lappend lst_data $byte
+	} 
+
+	if {$record_type == 01} {
+		break
+	}
+	if {$record_type == 00} {
+		if {[string length $raw_data] eq 0} {
+			exp_send_error "A record is missing data."
+			exit 1
+		}
+		for {set i 0} {$i < $byte_count} {incr i} {
+			set addr [expr ($start_addr+$i)]
+			lappend lst_addrdata $addr
+			lappend lst_addrdata [lindex "$lst_data" "$i"]
+		}
+	}
+}
+
+# Initialize the Z80180 programmer.
+expect {Connected}
+exp_send_user "Press RESET on programmer.\n"
+expect -re {Z80180>.*}
+exp_send -- ""
+expect -re {Z80180>.*}
+exp_send -- "H"
+expect -re {Z80180>.*}
+exp_send -- ""
+expect -re {Z80180>.*}
+
+# Erase the DUT flash chip.
+foreach {i j} $lst_chiperase {
+	exp_send -- "A"
+	expect -re {Alter Memory Starting at :.*}
+	exp_send -- "$i\r"
+	expect -re "$i.*"
+	exp_send -- "$j."
+	expect -re {Z80180>.*}
+}
+exp_send -- ""
+expect -re {Z80180>.*}
+exp_send -- "H"
+expect -re {Z80180>.*}
+exp_send -- ""
+expect -re {Z80180>.*}
+
+# Program the DUT flash chip.
+foreach {addr data} $lst_addrdata {
+	# Unlock the DUT flash chip for writing.
+	foreach {i j} $lst_bytewrite {
+		exp_send -- "A"
+		expect -re {Alter Memory Starting at :.*}
+		exp_send -- "$i\r"
+		expect -re "$i.*"
+		exp_send -- "$j."
+		expect -re {Z80180>.*}
+	}
+	# Write one byte to the DUT flash chip.
+	exp_send -- "A"
+	expect -re {Alter Memory Starting at :.*}
+	exp_send -- "[format %04X $addr]\r"
+	expect -exact "[format %04X $addr]\r"
+	exp_send -- "$data."
+	expect -re {Z80180>.*}
+	exp_send_user "Address [format %04X $addr]\tData $data\n"
+}
+exp_send -- ""
+expect -re {Z80180>.*}
+exp_send -- "H"
+expect -re {Z80180>.*}
+exp_send -- ""
+expect -re {Z80180>.*}
+
+exp_send_user "Flash chip successfully programmed.\n"
