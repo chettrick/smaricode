@@ -5,7 +5,7 @@ z80 single board computer for assembly language exploration
 
 =====
 
-flashloader - Hex file download program based on Expect and TCL.
+flashloader - Hex file download program written in Expect and TCL.
 
 smari.asm - Monitor program for the smari.
 
@@ -14,7 +14,7 @@ smari.bat - DOS batch file to run the TASM 3.1 assembler.
 =====
 
 The assembler currently used is the Telemark Cross Assembler V3.1 from
-http://home.comcast.net/~tasm/
+Squak Valley Software. http://home.comcast.net/~tasm/
 Assembling smari.asm on OpenBSD is a rather convoluted mess at the moment.
 DOSBox is used to run tasm31.exe with the batch file smari.bat.
 The file tasm80.tab needs to be in the same directory as tasm31.exe.
