@@ -10,7 +10,7 @@ LOC   OBJECT CODE   LINE   STMT SOURCE CODE
 0002                   5      5 DIGIT	EQU	02H		;8255 I port C
 0003                   6      6 P8255	EQU	03H		;8255 I control port
 00a5                   7      7 PWCODE	EQU	0A5H		;Power-up code
-                       8      8 ;ZSUM	EQU	71H		;This will make the sum of all
+                       8      8 ;ZSUM	EQU	71H		;XXX - This will make the sum of all
                        9      9 				;monitor codes to be zero
                       10     10 
                       11     11 ; The following EQUATEs are used for timing.
@@ -68,7 +68,7 @@ LOC   OBJECT CODE   LINE   STMT SOURCE CODE
                       63     63 ;			active high. Bit 5 is the leftmost column.
                       64     64 
                       65     65 ;***********************************************************
-                      66     66 	ORG	00H		;Required to make sure assembler 
+                      66     66 	ORG	00H		;Required to make sure assembler
                       67     67 RST00				;doesn't skip over address 0000H
                       68     68 
                       69     69 ; There are two cases that will generate a RESET signal:
@@ -342,7 +342,7 @@ LOC   OBJECT CODE   LINE   STMT SOURCE CODE
 00c1  00             337    337 	NOP
 00c2  00             338    338 	NOP
                      339    339 
-00c3  11 62 00       340    340 	LD	DE, -USERSTK-1	;XXX - Should be +1, not -1.
+00c3  11 62 00       340    340 	LD	DE, (-USERSTK)+1
 00c6  19             341    341 	ADD	HL, DE
 00c7  38 07          342    342 	JR	C, SETST0
 00c9  dd 21 b6 ff    343    343 	LD	IX, DISPBF
@@ -2379,7 +2379,7 @@ LOC   OBJECT CODE   LINE   STMT SOURCE CODE
 06ac  cd 31 05      2374   2374 	CALL	SUM
 06af  28 01         2375   2375 	JR	Z, SUMOK
 06b1  00            2376   2376 	NOP
-                    2377   2377 ;	HALT			;If error.
+                    2377   2377 ;	HALT			;If error. XXX - Calculate checksum.
 06b2  c7            2378   2378 SUMOK	RST	00H		;Display 'HELLO '.
 06b3  32 e5 ff      2379   2379 INI3	LD	(POWERUP), A	;Load power-code into (POWERUP).
                     2380   2380 				;The monitor uses the location to decide
@@ -2421,67 +2421,67 @@ LOC   OBJECT CODE   LINE   STMT SOURCE CODE
                     2416   2416 	ORG	0737H
                     2417   2417 KSUBFUN
 0737  1b 01         2418   2418 	DEFW	KINC
-0739  00            2419   2419 	DEFB	KINC-KINC	;XXX - Should all be +, not -.
-073a  05            2420   2420 	DEFB	-KINC-KDEC	;XXX - Should be -KINC+KDEC.
-073b  0a            2421   2421 	DEFB	-KINC-KGO
-073c  0f            2422   2422 	DEFB	-KINC-KSTEP
-073d  1a            2423   2423 	DEFB	-KINC-KDATA
-073e  2c            2424   2424 	DEFB	-KINC-KSBR
-073f  42            2425   2425 	DEFB	-KINC-KINS
-0740  7b            2426   2426 	DEFB	-KINC-KDEL
+0739  00            2419   2419 	DEFB	(-KINC)+KINC
+073a  05            2420   2420 	DEFB	(-KINC)+KDEC
+073b  0a            2421   2421 	DEFB	(-KINC)+KGO
+073c  0f            2422   2422 	DEFB	(-KINC)+KSTEP
+073d  1a            2423   2423 	DEFB	(-KINC)+KDATA
+073e  2c            2424   2424 	DEFB	(-KINC)+KSBR
+073f  42            2425   2425 	DEFB	(-KINC)+KINS
+0740  7b            2426   2426 	DEFB	(-KINC)+KDEL
 0741  c2 01         2427   2427 KFUN	DEFW	KPC
-0743  00            2428   2428 	DEFB	-KPC-KPC
-0744  1c            2429   2429 	DEFB	-KPC-KADDR
-0745  0a            2430   2430 	DEFB	-KPC-KCBR
-0746  14            2431   2431 	DEFB	-KPC-KREG
-0747  20            2432   2432 	DEFB	-KPC-KMV
-0748  20            2433   2433 	DEFB	-KPC-KRL
-0749  26            2434   2434 	DEFB	-KPC-KWT
-074a  26            2435   2435 	DEFB	-KPC-KRT
+0743  00            2428   2428 	DEFB	(-KPC)+KPC
+0744  1c            2429   2429 	DEFB	(-KPC)+KADDR
+0745  0a            2430   2430 	DEFB	(-KPC)+KCBR
+0746  14            2431   2431 	DEFB	(-KPC)+KREG
+0747  20            2432   2432 	DEFB	(-KPC)+KMV
+0748  20            2433   2433 	DEFB	(-KPC)+KRL
+0749  26            2434   2434 	DEFB	(-KPC)+KWT
+074a  26            2435   2435 	DEFB	(-KPC)+KRT
 074b  ec 01         2436   2436 HTAB	DEFW	HFIX
-074d  00            2437   2437 	DEFB	-HFIX-HFIX
-074e  16            2438   2438 	DEFB	-HFIX-HAD
-074f  03            2439   2439 	DEFB	-HFIX-HDA
-0750  26            2440   2440 	DEFB	-HFIX-HRGFIX
-0751  34            2441   2441 	DEFB	-HFIX-HMV
-0752  34            2442   2442 	DEFB	-HFIX-HRL
-0753  34            2443   2443 	DEFB	-HFIX-HWT
-0754  34            2444   2444 	DEFB	-HFIX-HRT
-0755  26            2445   2445 	DEFB	-HFIX-HRGAD
-0756  44            2446   2446 	DEFB	-HFIX-HRGDA
+074d  00            2437   2437 	DEFB	(-HFIX)+HFIX
+074e  16            2438   2438 	DEFB	(-HFIX)+HAD
+074f  03            2439   2439 	DEFB	(-HFIX)+HDA
+0750  26            2440   2440 	DEFB	(-HFIX)+HRGFIX
+0751  34            2441   2441 	DEFB	(-HFIX)+HMV
+0752  34            2442   2442 	DEFB	(-HFIX)+HRL
+0753  34            2443   2443 	DEFB	(-HFIX)+HWT
+0754  34            2444   2444 	DEFB	(-HFIX)+HRT
+0755  26            2445   2445 	DEFB	(-HFIX)+HRGAD
+0756  44            2446   2446 	DEFB	(-HFIX)+HRGDA
 0757  3d 02         2447   2447 ITAB	DEFW	IFIX
-0759  00            2448   2448 	DEFB	-IFIX-IFIX
-075a  03            2449   2449 	DEFB	-IFIX-IAD
-075b  03            2450   2450 	DEFB	-IFIX-IDA
-075c  00            2451   2451 	DEFB	-IFIX-IRGFIX
-075d  0e            2452   2452 	DEFB	-IFIX-IMV
-075e  0e            2453   2453 	DEFB	-IFIX-IRL
-075f  0e            2454   2454 	DEFB	-IFIX-IWT
-0760  0e            2455   2455 	DEFB	-IFIX-IRT
-0761  1f            2456   2456 	DEFB	-IFIX-IRGAD
-0762  1f            2457   2457 	DEFB	-IFIX-IRGDA
+0759  00            2448   2448 	DEFB	(-IFIX)+IFIX
+075a  03            2449   2449 	DEFB	(-IFIX)+IAD
+075b  03            2450   2450 	DEFB	(-IFIX)+IDA
+075c  00            2451   2451 	DEFB	(-IFIX)+IRGFIX
+075d  0e            2452   2452 	DEFB	(-IFIX)+IMV
+075e  0e            2453   2453 	DEFB	(-IFIX)+IRL
+075f  0e            2454   2454 	DEFB	(-IFIX)+IWT
+0760  0e            2455   2455 	DEFB	(-IFIX)+IRT
+0761  1f            2456   2456 	DEFB	(-IFIX)+IRGAD
+0762  1f            2457   2457 	DEFB	(-IFIX)+IRGDA
 0763  6b 02         2458   2458 DTAB	DEFW	DFIX
-0765  00            2459   2459 	DEFB	-DFIX-DFIX
-0766  03            2460   2460 	DEFB	-DFIX-DAD
-0767  03            2461   2461 	DEFB	-DFIX-DDA
-0768  00            2462   2462 	DEFB	-DFIX-DRGFIX
-0769  0e            2463   2463 	DEFB	-DFIX-DMV
-076a  0e            2464   2464 	DEFB	-DFIX-DRL
-076b  0e            2465   2465 	DEFB	-DFIX-DWT
-076c  0e            2466   2466 	DEFB	-DFIX-DRT
-076d  1f            2467   2467 	DEFB	-DFIX-DRGAD
-076e  1f            2468   2468 	DEFB	-DFIX-DRGDA
+0765  00            2459   2459 	DEFB	(-DFIX)+DFIX
+0766  03            2460   2460 	DEFB	(-DFIX)+DAD
+0767  03            2461   2461 	DEFB	(-DFIX)+DDA
+0768  00            2462   2462 	DEFB	(-DFIX)+DRGFIX
+0769  0e            2463   2463 	DEFB	(-DFIX)+DMV
+076a  0e            2464   2464 	DEFB	(-DFIX)+DRL
+076b  0e            2465   2465 	DEFB	(-DFIX)+DWT
+076c  0e            2466   2466 	DEFB	(-DFIX)+DRT
+076d  1f            2467   2467 	DEFB	(-DFIX)+DRGAD
+076e  1f            2468   2468 	DEFB	(-DFIX)+DRGDA
 076f  99 02         2469   2469 GTAB	DEFW	GFIX
-0771  00            2470   2470 	DEFB	-GFIX-GFIX
-0772  03            2471   2471 	DEFB	-GFIX-GAD
-0773  03            2472   2472 	DEFB	-GFIX-GDA
-0774  00            2473   2473 	DEFB	-GFIX-GRGFIX
-0775  4b            2474   2474 	DEFB	-GFIX-GMV
-0776  6d            2475   2475 	DEFB	-GFIX-GRL
-0777  8b            2476   2476 	DEFB	-GFIX-GWT
-0778  c1            2477   2477 	DEFB	-GFIX-GRT
-0779  00            2478   2478 	DEFB	-GFIX-GRGAD
-077a  00            2479   2479 	DEFB	-GFIX-GRGDA
+0771  00            2470   2470 	DEFB	(-GFIX)+GFIX
+0772  03            2471   2471 	DEFB	(-GFIX)+GAD
+0773  03            2472   2472 	DEFB	(-GFIX)+GDA
+0774  00            2473   2473 	DEFB	(-GFIX)+GRGFIX
+0775  4b            2474   2474 	DEFB	(-GFIX)+GMV
+0776  6d            2475   2475 	DEFB	(-GFIX)+GRL
+0777  8b            2476   2476 	DEFB	(-GFIX)+GWT
+0778  c1            2477   2477 	DEFB	(-GFIX)+GRT
+0779  00            2478   2478 	DEFB	(-GFIX)+GRGAD
+077a  00            2479   2479 	DEFB	(-GFIX)+GRGDA
                     2480   2480 
                     2481   2481 ; Key-posistion-code to key-internal-code conversion table.
                     2482   2482 
