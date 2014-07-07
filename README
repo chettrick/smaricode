@@ -9,16 +9,21 @@ flashloader - Hex file download program written in Expect and TCL.
 
 smari.asm - Monitor program for the smari.
 
-smari.bat - DOS batch file to run the TASM 3.1 assembler.
+smari.lst - List file generated from smari.asm.
+
+smari.hex - Intel hex format file of firmware generated from smari.asm.
+
+Makefile - Makefile containing targets for assembling and loading firmware.
+
+README - This file.
 
 =====
 
-The assembler currently used is the Telemark Cross Assembler V3.1 from
-Squak Valley Software. http://home.comcast.net/~tasm/
-Assembling smari.asm on OpenBSD is a rather convoluted mess at the moment.
-DOSBox is used to run tasm31.exe with the batch file smari.bat.
-The file tasm80.tab needs to be in the same directory as tasm31.exe.
+The assembler currently used is z80asm v1.6 from Udo Munk's z80pack v1.23.
+A fork of the assembler can be found at https://github.com/chettrick/z80asm
+Assembling smari.asm on OpenBSD is rather wonderful now that a sane MIT
+licensed assembler is available.
 
-flashloader is an expect program that parses the Intel hex file smari.hex
-and loads it into the smari single board computer through a custom-made
-programmer.
+flashloader is an Expect program that parses the Intel hex format file
+smari.hex and loads the firmware into the smari single board computer
+by way of a custom-made programmer.
