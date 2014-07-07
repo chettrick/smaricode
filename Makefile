@@ -1,10 +1,17 @@
-all: smari
+PROG=	smari
 
-smari: smari.asm smari.bat tasm31.exe tasm80.tab
-	@export SDL_VIDEODRIVER=dummy; \
-	dosbox -exit -securemode smari.bat >/dev/null 2>&1
+CC=	z80asm
+CFLAGS=	-fh -l
+
+all: ${PROG}.hex
+
+${PROG}.hex: ${PROG}.asm
+	${CC} ${CFLAGS} ${PROG}.asm
+
+load: ${PROG}.hex
+	flashloader ${PROG}.hex
 
 clean:
-	@rm -f SMARI.LST SMARI.HEX
+	rm -f ${PROG}.hex ${PROG}.lst
 
-.PHONY: clean
+.PHONY: all clean load
