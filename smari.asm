@@ -1,25 +1,24 @@
-;
-.FILL	0800H, 0FFH		;Fills empty space with FFh
+	PAGE	3000
 
-KIN	.EQU	00H		;8255 I port A
-SEG7	.EQU	01H		;8255 I port B
-DIGIT	.EQU	02H		;8255 I port C
-P8255	.EQU	03H		;8255 I control port
-PWCODE	.EQU	0A5H		;Power-up code
-;ZSUM	.EQU	71H		;This will make the sum of all
+KIN	EQU	00H		;8255 I port A
+SEG7	EQU	01H		;8255 I port B
+DIGIT	EQU	02H		;8255 I port C
+P8255	EQU	03H		;8255 I control port
+PWCODE	EQU	0A5H		;Power-up code
+;ZSUM	EQU	71H		;This will make the sum of all
 				;monitor codes to be zero
 
 ; The following EQUATEs are used for timing.
 ; Their values depend on the CPU clock frequency.
 ; (In this version, the crystal frequency is 1.79 MHz.)
 
-COLDEL	.EQU	201		;Column delay time for routine
+COLDEL	EQU	201		;Column delay time for routine
 				;SCAN and SCAN1
-F1KHZ	.EQU	65		;Delay count for 1 kHz square wave,
+F1KHZ	EQU	65		;Delay count for 1 kHz square wave,
 				;used by routine TONE1K.
-F2KHZ	.EQU	31		;Delay count for 2 kHz square wave,
+F2KHZ	EQU	31		;Delay count for 2 kHz square wave,
 				;used by routine TONE2K.
-MPERIOD .EQU	42		;1 kHz and 2 kHz threshold, used by
+MPERIOD EQU	42		;1 kHz and 2 kHz threshold, used by
 				;tape input routine PERIOD.
 
 ; The following EQUATEs are for tape modulation.
@@ -33,10 +32,10 @@ MPERIOD .EQU	42		;1 kHz and 2 kHz threshold, used by
 ; compatible in each case, because only the ratio is
 ; detected in the Tape-read.
 
-ONE_1K	.EQU	4
-ONE_2K	.EQU	4
-ZERO_1K	.EQU	2
-ZERO_2K	.EQU	8
+ONE_1K	EQU	4
+ONE_2K	EQU	4
+ZERO_1K	EQU	2
+ZERO_2K	EQU	8
 
 ;***********************************************************
 ; I/O port assignment: (8255 I)
@@ -64,8 +63,9 @@ ZERO_2K	.EQU	8
 ;			active high. Bit 5 is the leftmost column.
 
 ;***********************************************************
-RST00	.ORG	00H		;Required to make sure assembler 
-;				;doesn't skip over address 0000H
+	ORG	00H		;Required to make sure assembler
+RST00				;doesn't skip over address 0000H
+
 ; There are two cases that will generate a RESET signal:
 ;	(i)  power-up
 ;	(ii) 'RS' key pressed
@@ -131,7 +131,9 @@ PREPC	LD	(USERPC), HL
 	JR	RESET1
 ;
 ;***********************************************************
-RST28	.ORG	28H
+	ORG	28H
+RST28
+
 ; Address 28H is the entry point of BREAK trap.
 ; If a location is set as a BREAK point, the monitor
 ; will change the content of this location to C7 (RST 28H)
@@ -154,7 +156,8 @@ RST28	.ORG	28H
 	JR	CONT28
 ;
 ;***********************************************************
-RST30	.ORG	30H
+	ORG	30H
+RST30
 
 ; Instruction RST 30H (opcode F7) is usually used as:
 ;   i) Software break;
@@ -179,10 +182,11 @@ RESET1	LD	(USERIF), HL	;set user's I register and
 ; code in ROM zero. ROMTEST is a self-checking routine.
 ; This routine requires the sum of ROM to be zero.
 
-;	.BYTE	ZSUM
+;	DEFB	ZSUM		;XXX - Calculate checksum.
 ;
 ;***********************************************************
-RST38	.ORG	38H
+	ORG	38H
+RST38
 
 ; Entry point of RST 38H (opcode FF) or mode 1 interrupt.
 ; Fetch the address stored in location 0FFEEH and 0FFEFH,
@@ -254,7 +258,8 @@ RESET2:
 	JP	SETST0
 
 ;***********************************************************
-NMI	.ORG	66H
+	ORG	66H
+NMI
 
 ; Entry point of nonmaskable interrupt.  NMI will occur
 ; when MONI key is pressed or when user's program is
@@ -332,7 +337,7 @@ SETIF	LD	(USERIF), A
 	NOP
 	NOP
 
-	LD	DE, -USERSTK+1
+	LD	DE, -USERSTK-1	;XXX - Should be +1, not -1.
 	ADD	HL, DE
 	JR	C, SETST0
 	LD	IX, DISPBF
@@ -2217,7 +2222,7 @@ SCAN1:
 				;to the active column.
 KCOL	LD	A, E
 	OUT	(DIGIT), A	;Activate one column.
-	LD	A, (IX)
+	LD	A, (IX+0)
 	OUT	(SEG7), A
 	LD	B, COLDEL
 	DJNZ	$		;Delay 1.5 ms per digit.
@@ -2408,235 +2413,239 @@ NOTONE:
 ; which is much shorter than the 2-byte address.
 ; This can save the monitor code space.
 
-KSUBFUN	.ORG	0737H
-	.WORD	KINC
-	.BYTE	-KINC+KINC
-	.BYTE	-KINC+KDEC
-	.BYTE	-KINC+KGO
-	.BYTE	-KINC+KSTEP
-	.BYTE	-KINC+KDATA
-	.BYTE	-KINC+KSBR
-	.BYTE	-KINC+KINS
-	.BYTE	-KINC+KDEL
-KFUN	.WORD	KPC
-	.BYTE	-KPC+KPC
-	.BYTE	-KPC+KADDR
-	.BYTE	-KPC+KCBR
-	.BYTE	-KPC+KREG
-	.BYTE	-KPC+KMV
-	.BYTE	-KPC+KRL
-	.BYTE	-KPC+KWT
-	.BYTE	-KPC+KRT
-HTAB	.WORD	HFIX
-	.BYTE	-HFIX+HFIX
-	.BYTE	-HFIX+HAD
-	.BYTE	-HFIX+HDA
-	.BYTE	-HFIX+HRGFIX
-	.BYTE	-HFIX+HMV
-	.BYTE	-HFIX+HRL
-	.BYTE	-HFIX+HWT
-	.BYTE	-HFIX+HRT
-	.BYTE	-HFIX+HRGAD
-	.BYTE	-HFIX+HRGDA
-ITAB	.WORD	IFIX
-	.BYTE	-IFIX+IFIX
-	.BYTE	-IFIX+IAD
-	.BYTE	-IFIX+IDA
-	.BYTE	-IFIX+IRGFIX
-	.BYTE	-IFIX+IMV
-	.BYTE	-IFIX+IRL
-	.BYTE	-IFIX+IWT
-	.BYTE	-IFIX+IRT
-	.BYTE	-IFIX+IRGAD
-	.BYTE	-IFIX+IRGDA
-DTAB	.WORD	DFIX
-	.BYTE	-DFIX+DFIX
-	.BYTE	-DFIX+DAD
-	.BYTE	-DFIX+DDA
-	.BYTE	-DFIX+DRGFIX
-	.BYTE	-DFIX+DMV
-	.BYTE	-DFIX+DRL
-	.BYTE	-DFIX+DWT
-	.BYTE	-DFIX+DRT
-	.BYTE	-DFIX+DRGAD
-	.BYTE	-DFIX+DRGDA
-GTAB	.WORD	GFIX
-	.BYTE	-GFIX+GFIX
-	.BYTE	-GFIX+GAD
-	.BYTE	-GFIX+GDA
-	.BYTE	-GFIX+GRGFIX
-	.BYTE	-GFIX+GMV
-	.BYTE	-GFIX+GRL
-	.BYTE	-GFIX+GWT
-	.BYTE	-GFIX+GRT
-	.BYTE	-GFIX+GRGAD
-	.BYTE	-GFIX+GRGDA
+	ORG	0737H
+KSUBFUN
+	DEFW	KINC
+	DEFB	KINC-KINC	;XXX - Should all be +, not -.
+	DEFB	-KINC-KDEC	;XXX - Should be -KINC+KDEC, etc.
+	DEFB	-KINC-KGO
+	DEFB	-KINC-KSTEP
+	DEFB	-KINC-KDATA
+	DEFB	-KINC-KSBR
+	DEFB	-KINC-KINS
+	DEFB	-KINC-KDEL
+KFUN	DEFW	KPC
+	DEFB	-KPC-KPC
+	DEFB	-KPC-KADDR
+	DEFB	-KPC-KCBR
+	DEFB	-KPC-KREG
+	DEFB	-KPC-KMV
+	DEFB	-KPC-KRL
+	DEFB	-KPC-KWT
+	DEFB	-KPC-KRT
+HTAB	DEFW	HFIX
+	DEFB	-HFIX-HFIX
+	DEFB	-HFIX-HAD
+	DEFB	-HFIX-HDA
+	DEFB	-HFIX-HRGFIX
+	DEFB	-HFIX-HMV
+	DEFB	-HFIX-HRL
+	DEFB	-HFIX-HWT
+	DEFB	-HFIX-HRT
+	DEFB	-HFIX-HRGAD
+	DEFB	-HFIX-HRGDA
+ITAB	DEFW	IFIX
+	DEFB	-IFIX-IFIX
+	DEFB	-IFIX-IAD
+	DEFB	-IFIX-IDA
+	DEFB	-IFIX-IRGFIX
+	DEFB	-IFIX-IMV
+	DEFB	-IFIX-IRL
+	DEFB	-IFIX-IWT
+	DEFB	-IFIX-IRT
+	DEFB	-IFIX-IRGAD
+	DEFB	-IFIX-IRGDA
+DTAB	DEFW	DFIX
+	DEFB	-DFIX-DFIX
+	DEFB	-DFIX-DAD
+	DEFB	-DFIX-DDA
+	DEFB	-DFIX-DRGFIX
+	DEFB	-DFIX-DMV
+	DEFB	-DFIX-DRL
+	DEFB	-DFIX-DWT
+	DEFB	-DFIX-DRT
+	DEFB	-DFIX-DRGAD
+	DEFB	-DFIX-DRGDA
+GTAB	DEFW	GFIX
+	DEFB	-GFIX-GFIX
+	DEFB	-GFIX-GAD
+	DEFB	-GFIX-GDA
+	DEFB	-GFIX-GRGFIX
+	DEFB	-GFIX-GMV
+	DEFB	-GFIX-GRL
+	DEFB	-GFIX-GWT
+	DEFB	-GFIX-GRT
+	DEFB	-GFIX-GRGAD
+	DEFB	-GFIX-GRGDA
 
 ; Key-posistion-code to key-internal-code conversion table.
 
 KEYTAB:
-K0	.BYTE	03H	;HEX_3
-K1	.BYTE	07H	;HEX_7
-K2	.BYTE	0BH	;HEX_B
-K3	.BYTE	0FH	;HEX_F
-K4	.BYTE	20H	;NOT USED
-K5	.BYTE	21H	;NOT USED
-K6	.BYTE	02H	;HEX_2
-K7	.BYTE	06H	;HEX_6
-K8	.BYTE	0AH	;HEX_A
-K9	.BYTE	0EH	;HEX_E
-K0A	.BYTE	22H	;NOT USED
-K0B	.BYTE	23H	;NOT USED
-K0C	.BYTE	01H	;HEX_1
-K0D	.BYTE	05H	;HEX_5
-K0E	.BYTE	09H	;HEX_9
-K0F	.BYTE	0DH	;HEX_D
-K10	.BYTE	13H	;STEP
-K11	.BYTE	1FH	;TAPERD
-K12	.BYTE	00H	;HEX_0
-K13	.BYTE	04H	;HEX_4
-K14	.BYTE	08H	;HEX_8
-K15	.BYTE	0CH	;HEX_C
-K16	.BYTE	12H	;GO
-K17	.BYTE	1EH	;TAPEWR
-K18	.BYTE	1AH	;CBR
-K19	.BYTE	18H	;PC
-K1A	.BYTE	1BH	;REG
-K1B	.BYTE	19H	;ADDR
-K1C	.BYTE	17H	;DEL
-K1D	.BYTE	1DH	;RELA
-K1E	.BYTE	15H	;SBR
-K1F	.BYTE	11H	;-
-K20	.BYTE	14H	;DATA
-K21	.BYTE	10H	;+
-K22	.BYTE	16H	;INS
-K23	.BYTE	1CH	;MOVE
+K0	DEFB	03H	;HEX_3
+K1	DEFB	07H	;HEX_7
+K2	DEFB	0BH	;HEX_B
+K3	DEFB	0FH	;HEX_F
+K4	DEFB	20H	;NOT USED
+K5	DEFB	21H	;NOT USED
+K6	DEFB	02H	;HEX_2
+K7	DEFB	06H	;HEX_6
+K8	DEFB	0AH	;HEX_A
+K9	DEFB	0EH	;HEX_E
+K0A	DEFB	22H	;NOT USED
+K0B	DEFB	23H	;NOT USED
+K0C	DEFB	01H	;HEX_1
+K0D	DEFB	05H	;HEX_5
+K0E	DEFB	09H	;HEX_9
+K0F	DEFB	0DH	;HEX_D
+K10	DEFB	13H	;STEP
+K11	DEFB	1FH	;TAPERD
+K12	DEFB	00H	;HEX_0
+K13	DEFB	04H	;HEX_4
+K14	DEFB	08H	;HEX_8
+K15	DEFB	0CH	;HEX_C
+K16	DEFB	12H	;GO
+K17	DEFB	1EH	;TAPEWR
+K18	DEFB	1AH	;CBR
+K19	DEFB	18H	;PC
+K1A	DEFB	1BH	;REG
+K1B	DEFB	19H	;ADDR
+K1C	DEFB	17H	;DEL
+K1D	DEFB	1DH	;RELA
+K1E	DEFB	15H	;SBR
+K1F	DEFB	11H	;-
+K20	DEFB	14H	;DATA
+K21	DEFB	10H	;+
+K22	DEFB	16H	;INS
+K23	DEFB	1CH	;MOVE
 ;
 ;
 ;
 ;
-HELLO	.BYTE	000H		;' '
-	.BYTE	0BDH		;'O'
-	.BYTE	085H		;'L'
-	.BYTE	085H		;'L'
-	.BYTE	08FH		;'E'
-	.BYTE	037H		;'H'
-BLANK	.BYTE	0
-	.BYTE	0
-	.BYTE	0
-	.BYTE	0
-ERR_	.BYTE	0
-	.BYTE	0
-	.BYTE	003H		;'R'
-	.BYTE	003H		;'R'
-	.BYTE	08FH		;'E'
-	.BYTE	002H		;'-'
-SYS_SP	.BYTE	01FH		;'P'
-	.BYTE	0AEH		;'S'
-	.BYTE	002H		;'-'
-	.BYTE	0AEH		;'S'
-	.BYTE	0B6H		;'Y'
-	.BYTE	0AEH		;'S'
-ERR_SP	.BYTE	01FH		;'P'
-	.BYTE	0AEH		;'S'
-	.BYTE	002H		;'-'
-	.BYTE	003H		;'R'
-	.BYTE	003H		;'R'
-	.BYTE	08FH		;'E'
-	.BYTE	0
-STEPTAB	.BYTE	0AEH		;'S'
-	.BYTE	08FH		;'E'
-	.BYTE	0B3H		;'D'
-	.BYTE	0
-	.BYTE	0AEH		;'S'
-	.BYTE	0B3H		;'D'
-	.BYTE	0
-	.BYTE	0
-	.BYTE	00FH		;'F'
-	.BYTE	0AEH		;'S'
-	.BYTE	08FH		;'E'
-	.BYTE	0
-	.BYTE	00FH		;'F'
-	.BYTE	0
-REG_	.BYTE	0
-	.BYTE	0
-	.BYTE	002H		;'-'
-	.BYTE	0BEH		;'G'
-	.BYTE	08FH		;'E'
-	.BYTE	003H		;'R'
-RGTAB	.WORD	03F0FH		;'AF'
-	.WORD	0A78DH		;'BC'
-	.WORD	0B38FH		;'DE'
-	.WORD	03785H		;'HL'
-	.WORD	03F4FH		;'AF.'
-	.WORD	0A7CDH		;'BC.'
-	.WORD	0B3CFH		;'DE.'
-	.WORD	037C5H		;'HL.'
-	.WORD	03007H		;'IX'
-	.WORD	030B6H		;'IY'
-	.WORD	0AE1FH		;'SP'
-	.WORD	0300FH		;'IF'
-	.WORD	00F37H		;'FH'
-	.WORD	00F85H		;'FL'
-	.WORD	00F77H		;'FH.'
-	.WORD	00FC5H		;'FL.'
-SEGTAB	.BYTE	0BDH		;'0'
-	.BYTE	030H		;'1'
-	.BYTE	09BH		;'2'
-	.BYTE	0BAH		;'3'
-	.BYTE	036H		;'4'
-	.BYTE	0AEH		;'5'
-	.BYTE	0AFH		;'6'
-	.BYTE	038H		;'7'
-	.BYTE	0BFH		;'8'
-	.BYTE	0BEH		;'9'
-	.BYTE	03FH		;'A'
-	.BYTE	0A7H		;'B'
-	.BYTE	08DH		;'C'
-	.BYTE	0B3H		;'D'
-	.BYTE	08FH		;'E'
-	.BYTE	00FH		;'F'
+HELLO	DEFB	000H		;' '
+	DEFB	0BDH		;'O'
+	DEFB	085H		;'L'
+	DEFB	085H		;'L'
+	DEFB	08FH		;'E'
+	DEFB	037H		;'H'
+BLANK	DEFB	0
+	DEFB	0
+	DEFB	0
+	DEFB	0
+ERR_	DEFB	0
+	DEFB	0
+	DEFB	003H		;'R'
+	DEFB	003H		;'R'
+	DEFB	08FH		;'E'
+	DEFB	002H		;'-'
+SYS_SP	DEFB	01FH		;'P'
+	DEFB	0AEH		;'S'
+	DEFB	002H		;'-'
+	DEFB	0AEH		;'S'
+	DEFB	0B6H		;'Y'
+	DEFB	0AEH		;'S'
+ERR_SP	DEFB	01FH		;'P'
+	DEFB	0AEH		;'S'
+	DEFB	002H		;'-'
+	DEFB	003H		;'R'
+	DEFB	003H		;'R'
+	DEFB	08FH		;'E'
+	DEFB	0
+STEPTAB	DEFB	0AEH		;'S'
+	DEFB	08FH		;'E'
+	DEFB	0B3H		;'D'
+	DEFB	0
+	DEFB	0AEH		;'S'
+	DEFB	0B3H		;'D'
+	DEFB	0
+	DEFB	0
+	DEFB	00FH		;'F'
+	DEFB	0AEH		;'S'
+	DEFB	08FH		;'E'
+	DEFB	0
+	DEFB	00FH		;'F'
+	DEFB	0
+REG_	DEFB	0
+	DEFB	0
+	DEFB	002H		;'-'
+	DEFB	0BEH		;'G'
+	DEFB	08FH		;'E'
+	DEFB	003H		;'R'
+RGTAB	DEFW	03F0FH		;'AF'
+	DEFW	0A78DH		;'BC'
+	DEFW	0B38FH		;'DE'
+	DEFW	03785H		;'HL'
+	DEFW	03F4FH		;'AF.'
+	DEFW	0A7CDH		;'BC.'
+	DEFW	0B3CFH		;'DE.'
+	DEFW	037C5H		;'HL.'
+	DEFW	03007H		;'IX'
+	DEFW	030B6H		;'IY'
+	DEFW	0AE1FH		;'SP'
+	DEFW	0300FH		;'IF'
+	DEFW	00F37H		;'FH'
+	DEFW	00F85H		;'FL'
+	DEFW	00F77H		;'FH.'
+	DEFW	00FC5H		;'FL.'
+SEGTAB	DEFB	0BDH		;'0'
+	DEFB	030H		;'1'
+	DEFB	09BH		;'2'
+	DEFB	0BAH		;'3'
+	DEFB	036H		;'4'
+	DEFB	0AEH		;'5'
+	DEFB	0AFH		;'6'
+	DEFB	038H		;'7'
+	DEFB	0BFH		;'8'
+	DEFB	0BEH		;'9'
+	DEFB	03FH		;'A'
+	DEFB	0A7H		;'B'
+	DEFB	08DH		;'C'
+	DEFB	0B3H		;'D'
+	DEFB	08FH		;'E'
+	DEFB	00FH		;'F'
 ;
 ;***********************************************************
 ;SYSTEM RAM AREA
-USERSTK .ORG	0FF9FH
-	.BLOCK	16
-SYSSTK	.ORG	0FFAFH
-STEPBF	.BLOCK	7
-DISPBF	.BLOCK	6
+	ORG	0FF9FH
+USERSTK	DEFS	16
+
+	ORG	0FFAFH
+SYSSTK
+STEPBF	DEFS	7
+DISPBF	DEFS	6
+
 REGBF
-USERAF	.BLOCK	2
-USERBC	.BLOCK	2
-USERDE	.BLOCK	2
-USERHL	.BLOCK	2
-UAFP	.BLOCK	2
-UBCP	.BLOCK	2
-UDEP	.BLOCK	2
-UHLP	.BLOCK	2
-USERIX	.BLOCK	2
-USERIY	.BLOCK	2
-USERSP	.BLOCK	2
-USERIF	.BLOCK	2
-FLAGH	.BLOCK	2
-FLAGL	.BLOCK	2
-FLAGHP	.BLOCK	2
-FLAGLP	.BLOCK	2
-USERPC	.BLOCK	2
-ADSAVE	.BLOCK	2		;Contains addr being displayed now.
-BRAD	.BLOCK	2		;Break point address
-BRDA	.BLOCK	1		;Data of break point address
-STMINOR	.BLOCK	1		;Minor state
-STATE	.BLOCK	1		;State
-POWERUP	.BLOCK	1		;Power-up initialization
-TEST	.BLOCK	1		;Flag, bit 0 -- set when function or
+USERAF	DEFS	2
+USERBC	DEFS	2
+USERDE	DEFS	2
+USERHL	DEFS	2
+UAFP	DEFS	2
+UBCP	DEFS	2
+UDEP	DEFS	2
+UHLP	DEFS	2
+USERIX	DEFS	2
+USERIY	DEFS	2
+USERSP	DEFS	2
+USERIF	DEFS	2
+FLAGH	DEFS	2
+FLAGL	DEFS	2
+FLAGHP	DEFS	2
+FLAGLP	DEFS	2
+USERPC	DEFS	2
+ADSAVE	DEFS	2		;Contains addr being displayed now.
+BRAD	DEFS	2		;Break point address
+BRDA	DEFS	1		;Data of break point address
+STMINOR	DEFS	1		;Minor state
+STATE	DEFS	1		;State
+POWERUP	DEFS	1		;Power-up initialization
+TEST	DEFS	1		;Flag, bit 0 -- set when function or
 				;subfunction key is hit. Bit 7 --
 				;set when illegal key is entered.
-ATEMP	.BLOCK	1		;Temporary storage
-HLTEMP	.BLOCK	2		;Temporary storage
-TEMP	.BLOCK	4		;See comments on routine GDA.
-IM1AD	.BLOCK	2		;Contains addr of Opcode 'FF' service
+ATEMP	DEFS	1		;Temporary storage
+HLTEMP	DEFS	2		;Temporary storage
+TEMP	DEFS	4		;See comments on routine GDA.
+IM1AD	DEFS	2		;Contains addr of Opcode 'FF' service
 				;routine. (RST 38H, mode 1 int, etc)
-BEEPSET	.BLOCK	1		;Default value is 55H
-FBEEP	.BLOCK	1		;Beep frequency
-TBEEP	.BLOCK	2		;Time duration of beep
-	.END
+BEEPSET	DEFS	1		;Default value is 55H
+FBEEP	DEFS	1		;Beep frequency
+TBEEP	DEFS	2		;Time duration of beep
+	END
