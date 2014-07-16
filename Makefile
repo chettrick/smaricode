@@ -1,7 +1,7 @@
 PROG=	smari
 
 CC=	zz80asm
-CFLAGS=	-fh -l
+CFLAGS=	-l
 
 all: ${PROG}.hex
 
@@ -12,6 +12,6 @@ load: ${PROG}.hex
 	flashloader ${PROG}.hex
 
 clean:
-	rm -f ${PROG}.hex ${PROG}.lst
+	rm -f ${PROG}.bin ${PROG}.hex ${PROG}.lst
 
 .PHONY: all clean load
