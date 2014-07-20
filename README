@@ -5,8 +5,6 @@ z80 single board computer for assembly language exploration
 
 =====
 
-flashloader - Hex file download program written in Expect and TCL.
-
 smari.asm - Monitor program for the smari.
 
 smari.lst - List file generated from smari.asm.
@@ -24,6 +22,6 @@ A fork of the assembler can be found at https://github.com/chettrick/z80asm
 Assembling smari.asm on OpenBSD is rather wonderful now that a sane MIT
 licensed assembler is available.
 
-flashloader is an Expect program that parses the Intel hex format file
-smari.hex and loads the firmware into the smari single board computer
-by way of a custom-made programmer.
+flashloader is an Expect program that parses an Intel hex format file and
+loads the firmware into the smari single board computer by way of a
+custom-made programmer. It lives at https://github.com/chettrick/flashloader
