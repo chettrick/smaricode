@@ -1,5 +1,3 @@
-	PAGE	3000
-
 KIN	EQU	00H		;8255 I port A
 SEG7	EQU	01H		;8255 I port B
 DIGIT	EQU	02H		;8255 I port C
