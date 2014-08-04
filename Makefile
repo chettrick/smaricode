@@ -1,7 +1,7 @@
 PROG=	smari
 
 CC=	zz80asm
-CFLAGS=	-l
+CFLAGS=	-s n -v -l
 
 all: ${PROG}.hex
 
