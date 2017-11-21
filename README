@@ -18,7 +18,7 @@ README - This file.
 =====
 
 The assembler currently used is z80asm v1.6 from Udo Munk's z80pack v1.23.
-A fork of the assembler can be found at https://github.com/chettrick/z80asm
+A fork of the assembler can be found at https://github.com/chettrick/zz80asm
 Assembling smari.asm on OpenBSD is rather wonderful now that a sane MIT
 licensed assembler is available.
 

@@ -118,7 +118,7 @@ RST00				;doesn't skip over address 0000H
 	CALL	RAMCHK
 	JR	Z, PREPC
 	LD	H, 80H
-	
+
 PREPC	LD	(USERPC), HL
 	LD	H, 0
 
