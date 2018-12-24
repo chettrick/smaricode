@@ -21,10 +21,10 @@ MPERIOD EQU	42		;1 kHz and 2 kHz threshold, used by
 
 ; The following EQUATEs are for tape modulation.
 ; If the quality of tape recorder is good, the user may
-; change '4 4 2 8' to '2 2 1 4'. This will double
+; change '4 4 2 8' to '2 2 1 4'.  This will double
 ; the tape data rate.
 ; If the quality of tape recorder is poor, the user may
-; change '4 4 2 8' to '6 6 3 12'. This will improve
+; change '4 4 2 8' to '6 6 3 12'.  This will improve
 ; error performance but slow down the data rate.
 ; Although the data format is changed the tape is still
 ; compatible in each case, because only the ratio is
@@ -53,12 +53,12 @@ ZERO_2K	EQU	8
 ;	bit 0	-- segment e
 ; port C (address 02H):
 ;	bit 7	-- I2C bus serial clock output
-;	bit 6	-- BREAK enable. NMI (CPU pin 17) will go to
+;	bit 6	-- BREAK enable.  NMI (CPU pin 17) will go to
 ;			low 5 M1's (machine cycle one) after this
-;			bit goes to low. (This bit is connected to
+;			bit goes to low.  (This bit is connected to
 ;			the reset input of external counter.)
-;	bit 5-0	-- colums of keyboard and the display matrix,
-;			active high. Bit 5 is the leftmost column.
+;	bit 5-0	-- columns of keyboard and the display matrix,
+;			active high.  Bit 5 is the leftmost column.
 
 ;***********************************************************
 	ORG	00H		;Required to make sure assembler
@@ -79,7 +79,7 @@ RST00				;doesn't skip over address 0000H
 ; reset, which has the following effects:
 ;   e) disable BREAK POINT;
 ;   f) set the contents of location 0FFEEH and 0FFEFH to 66
-;      and 00 respectively. This will make instruction RST
+;      and 00 respectively.  This will make instruction RST
 ;      38H (opcode FF) have the same effect as BREAK.
 ; Memory location POWERUP is used to distinguish power-up
 ; from RS-key.  (POWERUP) contains random data when
@@ -89,7 +89,7 @@ RST00				;doesn't skip over address 0000H
 	DJNZ	$		;Power-up delay
 
 ; Initialize 8255 to mode 0 with port A input,
-; port B and C output. The control word is 90H.
+; port B and C output.  The control word is 90H.
 
 	LD	A, 10010000B
 	OUT	(P8255), A
@@ -104,7 +104,7 @@ RST00				;doesn't skip over address 0000H
 	LD	SP, SYSSTK	;initial system stack
 
 ; If the content of location POWERUP is not equal to
-; PWCODE, call subroutine INI. Continue otherwise.
+; PWCODE, call subroutine INI.  Continue otherwise.
 
 	LD	A, (POWERUP)
 	CP	PWCODE
@@ -177,7 +177,7 @@ RESET1	LD	(USERIF), HL	;set user's I register and
 ;***********************************************************
 
 ; The following byte makes the sum of the monitor
-; code in ROM zero. ROMTEST is a self-checking routine.
+; code in ROM zero.  ROMTEST is a self-checking routine.
 ; This routine requires the sum of ROM to be zero.
 
 ;	DEFB	ZSUM		;XXX - Calculate checksum.
@@ -359,15 +359,15 @@ BRRST0	LD	A, (BRDA)	;restore the data at
 	LD	(HL), A
 
 ; If the user's SP is legal (carry set), display user's
-; PC and the content at PC. Otherwise, display fixed
+; PC and the content at PC.  Otherwise, display fixed
 ; message (ERR-SP or SYS-SP or HELLO ).
 
 	CALL	C, MEMDP2
 ;
 ;
 ;***********************************************************
-; Scan the display and keyboard. When a key is detected,
-; take proper action  according to the key pressed.
+; Scan the display and keyboard.  When a key is detected,
+; take proper action according to the key pressed.
 
 MAIN:
 	LD	SP, SYSSTK	;Initialize system stack
@@ -410,7 +410,7 @@ KEYEXEC:
 ;      (+, -, GO, STEP, DATA, SBR, INS, DEL)
 ;      There is no state corresponding to these keys.
 ;      The response of them depends on the current
-;      state and minor-state. (E.g., the response of '+'
+;      state and minor-state.  (E.g., the response of '+'
 ;      key depends on the current function.  It is illegal
 ;      when the display is 'HELLO ', but is legal when the
 ;      display is of 'address-data' form.)  In this
@@ -425,7 +425,7 @@ KEYEXEC:
 
 ;(iii) key code = 18H - 1FH
 ;      (PC, Addr, CBr, Reg, Move, Rela, USB WR, USB RD)
-;      These keys are named 'function key'. They are
+;      These keys are named 'function key'.  They are
 ;      acceptable at any time.  When they are hit, the
 ;      monitor will unconditionally enter a new state.
 ;      STMINOR contains the minor-state, which is required
@@ -685,8 +685,8 @@ KDEL:
 	JP	NZ, IGNORE	;If not, ignore the 'Del' key and
 				;send out a warning message.
 				;'Delete' is quite similar to
-				;'Insert',except that the memory
-				;is shifted up up instead of shifted
+				;'Insert', except that the memory
+				;is shifted up instead of shifted
 				;down.  See the comments on
 				;routine KINS for details.
 	LD	HL, (ADSAVE)	;Get the address being displayed
@@ -820,11 +820,11 @@ HDA	LD	HL, (ADSAVE)	;Get the address being displayed
 	CALL	PRECL1		;If this is the first hexadecimal
 				;key entered after function or sub-
 				;function key, reset the data of that
-				;address to 0. (by routine PERCL1)
+				;address to 0 (by routine PERCL1).
 	LD	A, C		;The key-code is saved in C by
 				;routine KHEX.  Restore it to A.
 	RLD			;Rotate the key-code (4 bits) into
-				;the address obtained above. (in HL)
+				;the address obtained above (in HL).
 	CALL	MEMDP2		;Display the address and data,
 				;then set STATE to 2 (DA).
 	RET
@@ -855,7 +855,7 @@ HRGFIX:
 	LD	(HL), A		;into STMINOR.
 
 	CALL	REGDP8		;Display register and set
-				;STATE to 8. (RGAD)
+				;STATE to 8 (RGAD).
 	RET
 ;
 HRT:
@@ -1095,7 +1095,7 @@ EIDI	LD	(TEMP+1), HL
 				;out this address and transfers
 				;control to it.  The first M1
 				;of user's program will be the
-				;5th M1 after OUT. If break point
+				;5th M1 after OUT.  If break point
 				;is enabled, NMI will occur after
 				;this instruction is completed.
 				;This is the mechanism of single
@@ -1110,7 +1110,7 @@ GMV	LD	HL, STEPBF
 				;HL = start address of source
 				;BC = length to MOVE.
 	JR	C, ERROR	;Jump to ERROR if the
-				;parameters are illegal. (I.e., Ending
+				;parameters are illegal.  (I.e., Ending
 				;address < starting address.)
 	LD	DE, (STEPBF+4)	;Load destination
 				;address into DE.
@@ -1180,18 +1180,18 @@ GWT:
 				;the sum of all data to be output
 				;to tape.
 	JR	C, ERROR	;Branch to ERROR if the
-				;parameters are illegal. (length is
-				;negative)
+				;parameters are illegal (length is
+				;negative).
 	LD	(STEPBF+6), A	;Store the checksum into
-				;STPEGBF+6.
+				;STEPBF+6.
 	LD	HL, 4000	;Output 1 kHz square
 				;wave for 4000 cycles.
 				;Leading sync. signal.
 	CALL	TONE1K
 	LD	HL, STEPBF	;Output 7 bytes starting
-				;at STEPBF. (Include:
+				;at STEPBF (Include:
 				;filename, starting, ending
-				;address and checksum)
+				;address and checksum).
 	LD	BC, 7
 	CALL	TAPEOUT
 	LD	HL, 4000	;Output 2 kHz square
@@ -1201,7 +1201,7 @@ GWT:
 				;in this interval.
 	CALL	TONE2K
 	CALL	GETPTR		;Load parameters into
-				;registers. (Starting, ending and
+				;registers (Starting, ending and
 				;length).
 	CALL	TAPEOUT		;Output user's data.
 	LD	HL, 4000	;Output 4000 cycles of
@@ -1548,8 +1548,8 @@ LOCSTNA
  ;registers destroyed: AF, DE
 	LD	A, (STATE)	;Get STATE.
 				;Possible states are:
-				;4,5,6,7. (Move, Rel,
-				;WRtape, RDtape)
+				;4,5,6,7 (Move, Rel,
+				;WRtape, RDtape).
 	SUB	4		;Change 4,5,6,7 to
 				;0,1,2,3
 	ADD	A, A		;Each state has 4 bytes for names
@@ -1567,9 +1567,9 @@ LOCSTNA
 				;returned pattern (in A) is
 				;zero,  the '+' or '-' must
 				;have been pressed beyond legal
-				;parameter boundary. (Check if
+				;parameter boundary.  (Check if
 				;parameter name got from STEPTAB
-				;is zero)
+				;is zero).
 	RET
 ;
 ;***********************************************************
@@ -1611,8 +1611,8 @@ RGSTIN:
 	LD	A, (STMINOR)	;Get register coutn.
 	RES	0, A		;Registers are displayed by
 				;pairs.  Find the count
-				;of pair leader.  (count of
-				;the lower one)
+				;of pair leader (count of
+				;the lower one).
 	LD	B, A		;Temprorarily save A.
 	CALL	RGNADP		;Find register count.
 				;Store them into DISPBF
@@ -1620,7 +1620,7 @@ RGSTIN:
 	LD	A, B		;Restore A (register pair leader).
 	CALL	LOCRG		;Get the address of
 				;user's register.
-	LD	E, (HL)		;Get register data. (2 bytes)
+	LD	E, (HL)		;Get register data (2 bytes).
 	INC	HL
 	LD	D, (HL)
 	LD	(ADSAVE), DE	;Convert them to display
@@ -1773,7 +1773,7 @@ DRL4	ADD	HL, HL		;Clear rightmost 3
 ;
 ENCODE:
 ; Encode HL register.  Each 4 bits of HL
-; are encoded to 1 bit. 0000 become 0,
+; are encoded to 1 bit.  0000 become 0,
 ; 0001 become 1.  The result is stored
 ; in bit 3-0 of A register.  Also, after
 ; execution, bit 7-4 of A are bit 3-0
@@ -1910,7 +1910,7 @@ GETBIT:
 
 ; The tape-bit format of both 0 and 1 are
 ; the same form: a high freq part followed by a
-; low freq part. The difference between 0 and 1
+; low freq part.  The difference between 0 and 1
 ; is the number of high freq cycles and low freq
 ; cycles.  Thus, a high freq period may have
 ; two meanings:
@@ -1931,7 +1931,7 @@ GETBIT:
 ; L register is used to up/down count the number of periods.
 ; when a high freq period is read, L is increased by
 ; 1; when a low freq period is read, L is decreased
-; by 2. (The time duration for each count is 0.5 ms.)
+; by 2.  (The time duration for each count is 0.5 ms).
 ; At the end of a tape-bit, positive and negative L
 ; stand for 0 and 1 respectively.
 
@@ -1988,7 +1988,7 @@ PERIOD:
 ; unit is loop count.  Typical value for
 ; 2kHz is 28, for 1 kHz is 56.
 ; Use (56+28)/2 as threshold.  The returned
-; result is in carry flag. (1 kHz -- NC, 2 kHz -- C)
+; result is in carry flag.  (1 kHz -- NC, 2 kHz -- C)
 ; Registers destroyed: AF, DE
 
 	LD	DE, 0
@@ -2360,7 +2360,7 @@ TNEXT	CPI
 ;Monitor ROM self-check.  Add the data of address
 ;0000 - 0800.  If the sum equals to 0, reset the monitor
 ;and display 'HELLO '.  If the sum is not 0, which
-;indicates error, HALT. Summed by adding without carry.
+;indicates error, HALT.  Summed by adding without carry.
 ;Input: none.
 ;Output: none.
 ;Destroyed registers: AF, BC, HL.
@@ -2633,13 +2633,13 @@ STMINOR	DEFS	1		;Minor state
 STATE	DEFS	1		;State
 POWERUP	DEFS	1		;Power-up initialization
 TEST	DEFS	1		;Flag, bit 0 -- set when function or
-				;subfunction key is hit. Bit 7 --
+				;subfunction key is hit.  Bit 7 --
 				;set when illegal key is entered.
 ATEMP	DEFS	1		;Temporary storage
 HLTEMP	DEFS	2		;Temporary storage
 TEMP	DEFS	4		;See comments on routine GDA.
 IM1AD	DEFS	2		;Contains addr of Opcode 'FF' service
-				;routine. (RST 38H, mode 1 int, etc)
+				;routine.  (RST 38H, mode 1 int, etc)
 BEEPSET	DEFS	1		;Default value is 55H
 FBEEP	DEFS	1		;Beep frequency
 TBEEP	DEFS	2		;Time duration of beep
