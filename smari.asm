@@ -3,7 +3,8 @@ SEG7	EQU	01H		;8255 I port B
 DIGIT	EQU	02H		;8255 I port C
 P8255	EQU	03H		;8255 I control port
 PWCODE	EQU	0A5H		;Power-up code
-;ZSUM	EQU	71H		;XXX - This will make the sum of all
+;ZSUM	EQU	00H		;XXX - Zero to find total sum.
+ZSUM	EQU	0A5H		;XXX - This will make the sum of all
 				;monitor codes to be zero
 
 ; The following EQUATEs are used for timing.
@@ -180,8 +181,8 @@ RESET1	LD	(USERIF), HL	;set user's I register and
 ; code in ROM zero.  ROMTEST is a self-checking routine.
 ; This routine requires the sum of ROM to be zero.
 
-;	DEFB	ZSUM		;XXX - Calculate checksum.
-;
+	DEFB	ZSUM
+
 ;***********************************************************
 	ORG	38H
 RST38
@@ -255,6 +256,7 @@ RESET2:
 
 	JP	SETST0
 
+	NOP			;XXX - Fill empty space 000H.
 ;***********************************************************
 	ORG	66H
 NMI
@@ -2372,7 +2374,7 @@ ROMTEST:
 	CALL	SUM
 	JR	Z, SUMOK
 	NOP
-;	HALT			;If error. XXX - Calculate checksum.
+	HALT			;If error.
 SUMOK	RST	00H		;Display 'HELLO '.
 INI3	LD	(POWERUP), A	;Load power-code into (POWERUP).
 				;The monitor uses the location to decide
@@ -2410,6 +2412,51 @@ NOTONE:
 ; this address.  Offset is only one byte long,
 ; which is much shorter than the 2-byte address.
 ; This can save the monitor code space.
+;
+; XXX - Need NOPs from 06E1H to 0736H.
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFW	00000H		;NOPs
+	DEFB	000H		;NOPs
 
 	ORG	0737H
 KSUBFUN
